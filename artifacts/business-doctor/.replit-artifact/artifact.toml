@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Business Doctor"
+description = "A public-facing website for Business Doctor, a digital marketing agency serving small businesses and local brands across Delhi NCR, with transparent service pricing and SEO information."
+version = "1.0.0"
+id = "artifacts/business-doctor"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21558
+
+[services.development]
+run = "pnpm --filter @workspace/business-doctor run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/business-doctor", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/business-doctor/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21558"
+BASE_PATH = "/"

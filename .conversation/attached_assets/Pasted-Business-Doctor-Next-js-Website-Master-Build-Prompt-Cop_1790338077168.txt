@@ -1,0 +1,254 @@
+Business Doctor — Next.js Website Master Build Prompt
+Copy this entire document as-is into your AI coding tool (Claude Code, Cursor, v0, etc.) as the build brief. Follow every section in order.
+
+0. Non-Negotiable Rules
+Framework: Next.js 14, Pages Router, all files as plain .js (JSX inside .js, NOT .tsx / .ts). No TypeScript anywhere.
+Content: Use ONLY the content provided in Section 5 and Section 6 below — do not invent new copy, do not remove any line of the given content, do not paraphrase headings/FAQs/pricing. Content is final.
+Pages to build:
+pages/index.js → Homepage (full content from Section 5)
+pages/services/seo.js → ONE dummy service page (template from Section 6), built so it can be duplicated for the other 5 services later.
+Styling: Tailwind CSS.
+Animation: Framer Motion only — no other animation library.
+Every image must have real width/height (or fill + a sized parent) via next/image — never an unsized <img>. This is mandatory for CLS.
+1. Brand & Design System
+Brand feel: "Doctor for your business" — clinical trust + digital growth. Calm, credible, not flashy. Think: a health checkup for your marketing, delivered by a modern agency.
+
+1.1 Color Palette (add to tailwind.config.js)
+colors: {
+  primary: {
+    DEFAULT: '#0B3B5C',   // deep trust blue — headers, nav, main headings
+    dark: '#082A42',
+    light: '#154B73',
+  },
+  accent: {
+    DEFAULT: '#F97316',   // clinic-orange — CTAs, buttons, highlights
+    hover: '#EA580C',
+  },
+  growth: {
+    DEFAULT: '#0EA36B',   // health/growth green — stats, success badges, checkmarks
+    light: '#E6F7EF',
+  },
+  neutral: {
+    50: '#F8FAFB',
+    100: '#F1F5F8',
+    200: '#E4EAEF',
+    600: '#5B6B7A',
+    800: '#1E2A33',
+    900: '#0F171D',
+  },
+},
+Background: neutral-50 for section alternation with pure white (#FFFFFF), never pure black.
+Text: headings neutral-900, body neutral-600.
+CTA buttons: solid accent, hover accent-hover, white text, rounded-full or rounded-lg (pick one and stay consistent).
+1.2 Typography (use next/font/google — never a <link> tag, to avoid CLS/FOUT)
+// fonts.js
+import { Sora, Inter } from 'next/font/google'
+export const sora = Sora({ subsets: ['latin'], weight: ['600','700','800'], variable: '--font-heading', display: 'swap' })
+export const inter = Inter({ subsets: ['latin'], weight: ['400','500','600'], variable: '--font-body', display: 'swap' })
+Headings (H1–H3): Sora, bold (700/800), tight tracking.
+Body/paragraphs/FAQ/pricing table: Inter, 400/500.
+Scale: H1 text-4xl md:text-6xl, H2 text-3xl md:text-4xl, H3 text-xl md:text-2xl, body text-base md:text-lg, small/notes text-sm.
+display: 'swap' is mandatory — prevents invisible-text flash and layout shift.
+1.3 Spacing / Shape
+Section vertical padding: py-16 md:py-24.
+Card radius: rounded-2xl, shadow: shadow-md hover:shadow-xl transition-shadow.
+Max content width: max-w-7xl mx-auto px-4 md:px-8.
+2. Folder Structure
+pages/
+  _app.js
+  _document.js
+  index.js
+  services/
+    seo.js
+components/
+  layout/
+    Header.js
+    Footer.js
+  home/
+    Hero.js
+    WhatWeDo.js          (6 services grid)
+    ServicesDetail.js     (alternating image/text blocks)
+    PricingTable.js
+    WhoWeWorkWith.js
+    AreasWeServe.js
+    FAQ.js
+    CTABand.js
+  service-page/
+    ServiceHero.js
+    ServiceFeatures.js
+    ServiceProcess.js
+    ServiceCTA.js
+  shared/
+    AnimatedCounter.js
+    SectionHeading.js
+    Button.js
+lib/
+  fonts.js
+  seo.js                  (SEO/meta config + JSON-LD builder)
+public/
+  images/
+    hero/, services/, icons/, areas/
+styles/
+  globals.css
+3. Animation Spec (Framer Motion) — exactly where and what
+Define these reusable variants once in lib/motion.js and reuse everywhere — do not write one-off animation objects per component.
+
+export const fadeUp = {
+  hidden: { opacity: 0, y: 28 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
+}
+export const staggerContainer = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.12 } },
+}
+Rule for every scroll animation:
+
+<motion.div
+  variants={fadeUp}
+  initial="hidden"
+  whileInView="show"
+  viewport={{ once: true, amount: 0.3 }}
+/>
+once: true is mandatory — animations must never replay on re-scroll (feels cheap, also wastes CPU).
+
+Section	Animation
+Header	Sticky top; on scroll >50px, shrink height + add shadow-sm bg-white/90 backdrop-blur. Transition via CSS, not Framer (keep JS off the scroll listener path).
+Hero	H1 + subtext + CTA fade-up in a staggerContainer on page load (not on scroll — it's above the fold, must render fast, animate in-place). Optional: subtle animated "pulse line" SVG (heartbeat-style stroke draw, 2–3s loop, low opacity) behind hero as a brand motif — must be inline SVG, not a GIF/video, and must not block LCP text render.
+Stats (967 conversations, ₹7.40/conversation, ₹7,155 spend)	AnimatedCounter — count up from 0 when scrolled into view, once.
+"What a Digital Marketing Agency Does" (6 items)	Grid with staggerContainer + fadeUp per card, 0.1s stagger.
+Services Detail blocks	Alternate image-left/text-right and reverse; each block fades up independently as it enters viewport. Image gets a subtle scale: 1.05 → 1 on enter (2% only — no whiplash).
+Pricing table	Rows fade up in staggerContainer; row whileHover={{ scale: 1.01 }} on desktop only.
+Areas We Serve	Tag/pill list, each pill scales in with stagger (scale: 0.9 → 1).
+FAQ	Accordion: height auto-animate via Framer AnimatePresence + motion.div with initial/animate/exit height. Only one open at a time.
+CTA Band (bottom)	Fade-up + subtle background gradient shift on hover of the CTA button only.
+Buttons (all)	whileHover={{ scale: 1.03 }}, whileTap={{ scale: 0.97 }}.
+Do NOT animate: the hero's actual heading text opacity below a floor that delays LCP, layout-affecting properties like width/height (animate transform/opacity only — this is also the CLS/perf rule), or anything on the nav that fires on every scroll pixel (throttle/debounce or use CSS).
+
+4. SEO Checklist (implement in lib/seo.js, imported via next/head per page)
+ <title> = exact Meta Title given below, <meta name="description"> = exact Meta Description given.
+ One <h1> per page only (Homepage H1 = "Digital Marketing Agency in Delhi NCR"; Service page H1 = service name).
+ Logical heading order — no skipping H2→H4.
+ Open Graph tags: og:title, og:description, og:image (1200×630), og:type=website, og:url.
+ Twitter card meta.
+ Canonical URL tag on every page.
+ JSON-LD LocalBusiness schema on homepage: name "Business Doctor", areaServed (all listed Delhi NCR areas), priceRange, address locality Uttam Nagar/West Delhi.
+ JSON-LD FAQPage schema wrapping the FAQ section content — reuse exact Q&A text.
+ JSON-LD Service schema on the service dummy page.
+ All images: descriptive alt text including service + location keywords (e.g., alt="SEO services for small businesses in Delhi NCR"), never generic alt="image1".
+ sitemap.xml and robots.txt in public/.
+ Internal links: homepage service cards link to /services/seo (and future service slugs); footer links to all pages.
+ URLs lowercase, hyphenated (/services/seo, not /services/SEO_Page).
+ Use next/link for all internal navigation (no full page reloads).
+5. Homepage Content Map — pages/index.js
+Build these sections top to bottom, using this exact copy:
+
+5.1 Hero
+H1: "Digital Marketing Agency in Delhi NCR"
+Subtext: "Business Doctor is a full-service digital marketing agency based in Uttam Nagar, Delhi NCR. We handle SEO, Google and Meta Ads, social media management, web development, e-commerce management, and product photography for small businesses, startups, and local brands across Delhi NCR."
+Intro line below: "If you're looking for a digital marketing company in Delhi NCR that manages everything under one roof — from ranking your website on Google to running your ad campaigns — this is what we do and what it costs."
+Primary CTA button: "Get a Free Quote" (or similar — links to contact)
+Image note: hero image of a professional Indian small-business/office or a "diagnostic dashboard" visual — source from a stock site with keywords: "digital marketing team meeting India" or "business growth dashboard".
+5.2 What a Digital Marketing Agency Does (6-card grid)
+Heading: "What a Digital Marketing Agency Does" Intro: "A digital marketing agency manages the channels that bring customers to your business online. That includes:" Cards (icon + title + one-liner, use the exact text given):
+
+SEO (Search Engine Optimization) — getting your website to rank on Google for the searches your customers are already making
+PPC (Google Ads & Meta Ads) — paid campaigns that put you in front of buyers immediately, instead of waiting for organic rankings
+Social Media Marketing (SMM/SMO) — managing your Instagram, Facebook, and other profiles to build an audience and generate leads
+Web Development — building the website or landing page your other marketing channels send traffic to
+E-commerce Management — listing and managing your products on Amazon and other marketplaces
+Product Photography — professional product shots for your website, marketplace listings, and ads
+Closing paragraph (below grid, not in a card): "Most businesses don't need all six at once. A new business usually starts with a website and local SEO. A business that already has traffic but low conversions usually needs paid ads or better product photography first. Where you start depends on where the gap in your funnel actually is — not on which package sounds biggest."
+
+5.3 Our Services in Delhi NCR (alternating blocks)
+Heading: "Our Services in Delhi NCR"
+
+SEO Services — "We handle on-page SEO, technical SEO, local SEO, and keyword-targeted content. If your business serves a specific area — Gurgaon, Noida, Dwarka, Rohini, Janakpuri, Saket, Faridabad, or Ghaziabad — we build local SEO around that area specifically, rather than generic city-wide targeting."
+Google & Meta Ads (PPC) — "Campaign setup, targeting, ad creatives, and ongoing optimization for Google Search Ads and Meta (Facebook/Instagram) Ads. In one recent campaign for a manufacturing client, we generated 967 messaging conversations at ₹7.40 per conversation on a total spend of ₹7,155 — that's the kind of cost-per-result tracking we run on every campaign." (→ this is the AnimatedCounter block: animate 967, ₹7.40, ₹7,155 as three stat counters)
+Social Media Management — "Content planning, posting, and community management for Instagram and Facebook, aimed at building an audience that converts, not just follower counts."
+Web Development — "Business websites and e-commerce platforms built for speed and conversions, not just appearance."
+E-commerce & Amazon Management — "Amazon account setup, product listing, variant listing, and ongoing account management."
+Product Photography — "On-location and studio product photography for websites, marketplaces, and ad creatives."
+Image note per block: alternate stock/illustration per service (SEO = analytics dashboard, PPC = ad campaign screen, SMM = phone with Instagram grid, Web Dev = code/laptop, E-commerce = Amazon boxes/packaging, Photography = product shoot studio). Keep all images same aspect ratio (e.g., 4:3) so the grid never shifts on load.
+
+5.4 Pricing Table
+Heading: "Pricing" Intro: "We publish our pricing because "contact us for a quote" doesn't help you compare options. All prices below are current, standard rates — not a limited-time offer."
+
+Service	Price	Notes
+SEO — Per Keyword	₹1,800/keyword/month	Pay only for the keywords you target
+SEO — 10 Keywords (Standard)	₹13,200/month	Most common starting package
+SEO — Custom Enterprise	Custom quote	For larger keyword sets and multi-location businesses
+Google & Meta Ads Management	₹9,600/month	Campaign setup, targeting, and optimization
+Social Media Management (Unified Growth)	₹30,000/month	Full social media handling across platforms
+Business Website	Starting ₹18,000	One-time build
+E-Commerce Platform	Starting ₹30,000	One-time build
+Amazon Account — One-Time Setup	₹3,000	Flat fee
+Amazon Account Management	₹4,800/month	Ongoing management after setup
+Standard Product Listing	₹300/product	Amazon/marketplace listing
+Color Variant Listing	₹420/product	Per additional variant
+Product Photography	₹480/product	Studio or on-location
+Professional Shoot (Full Day)	₹9,600/day	For larger catalogs
+Closing line: "Need more than one service? We build custom packages combining SEO, ads, and social media based on your budget and goals — get in touch for a quote tailored to your business."
+
+Build as a responsive table on desktop, stacked cards on mobile (never a horizontally-scrolling table with no indicator — add a fade-edge or scroll hint if you keep it as a table on mobile).
+
+5.5 Who We Work With
+Heading: "Who We Work With" Text: "We work with small businesses, startups, and local brands across Delhi NCR — not just large enterprises with big marketing budgets. Whether you're a local service business trying to rank in your neighbourhood or an e-commerce brand trying to scale on Amazon, our packages are built to be affordable at the small-business level while still being results-focused."
+
+5.6 Areas We Serve
+Heading: "Areas We Serve" Text: "Business Doctor serves businesses across Delhi NCR, with a focus on Uttam Nagar and West Delhi, extending to Dwarka, Janakpuri, Rohini, Saket, South Delhi, Gurgaon (including Cyber City), Noida, Greater Noida, Faridabad, and Ghaziabad." Render the area names as animated pill/tag chips (see Section 3).
+
+5.7 FAQ (accordion — use exact Q&A)
+Heading: "Frequently Asked Questions"
+
+Which is the best digital marketing agency in Delhi NCR for small businesses? — The "best" agency depends on your budget and what you need first — SEO, ads, or a website. Business Doctor focuses specifically on small businesses and startups, with packages priced for that budget level rather than enterprise pricing scaled down.
+How much does digital marketing cost in Delhi? — It depends on the service. SEO starts at ₹1,800 per keyword per month, Google/Meta Ads management is ₹9,600/month, and a business website starts at ₹18,000. See the pricing table above for the full breakdown.
+What services does a Business Doctor offer? — SEO, Google and Meta Ads, social media management, web development, e-commerce/Amazon management, and product photography.
+Do you work with startups and small businesses, or only established brands? — We work mainly with small businesses, startups, and local brands. Our pricing model — per-keyword SEO, monthly ad management, starting-price websites — is built around that budget level.
+Which areas in Delhi NCR do you serve? — We're based in Uttam Nagar and prioritize West Delhi, and also serve Dwarka, Janakpuri, Rohini, Saket, South Delhi, Gurgaon, Noida, Greater Noida, Faridabad, and Ghaziabad.
+How long does SEO take to show results? — SEO is a monthly, ongoing service rather than a one-time fix — rankings built over time as content, technical fixes, and keyword targeting compound. Ask us for a timeline specific to your keywords and current site condition before committing.
+Can I get a custom package instead of a fixed plan? — Yes. Beyond the 10-keyword SEO package, we offer custom enterprise SEO quotes, and we combine services (SEO + ads + social) into custom packages based on your goals and budget.
+Do you offer both SEO and paid ads, or do I need to pick one? — Both are available separately or together. SEO builds long-term organic traffic; Google/Meta Ads bring in leads immediately while SEO is still building. Many businesses run both at once.
+What's included in the SEO per-keyword pricing model? — You pay ₹1,800 per keyword per month and we run SEO work — on-page, technical, and content — targeted at that specific keyword. The 10-keyword package at ₹13,200/month is the standard starting point if you have a broader keyword set to target.
+Is there a minimum contract period? — Contract terms vary by service — ask us directly for the minimum commitment on the specific package you're considering.
+Do you provide product photography for e-commerce and Amazon listings? — Yes. Product photography starts at ₹480/product, with a full-day professional shoot option at ₹9,600/day for larger catalogs.
+How do I get started with Business Doctor? — Contact us with your business details and the service you need. We'll recommend a starting package based on your goals and budget, rather than pushing the biggest plan.
+5.8 Closing CTA Band
+Simple band: "Ready to grow your business in Delhi NCR?" + CTA button → contact.
+
+5.9 Meta tags for this page
+Title: Digital Marketing Agency in Delhi NCR | Business Doctor
+Description: Business Doctor is a full-service digital marketing agency in Delhi NCR offering SEO, PPC, social media, web development, and more — with transparent pricing.
+6. Dummy Service Page — pages/services/seo.js
+Build this as a reusable template (props-driven, so duplicating for PPC/SMM/Web Dev/E-commerce/Photography later is a copy-paste + content swap):
+
+ServiceHero: H1 "SEO Services", short intro pulled from the SEO block copy in Section 5.3, CTA button.
+ServiceFeatures: on-page SEO, technical SEO, local SEO, keyword-targeted content — as 4 feature cards (derive from the same SEO paragraph — don't invent new claims beyond what's stated).
+Pricing snippet: reuse the 3 SEO rows from the pricing table (Per Keyword / 10 Keywords / Custom Enterprise) — same component as homepage pricing table, filtered.
+Relevant FAQs: reuse FAQ #2, #9, #10 from Section 5.7 (SEO-cost-related ones) — same accordion component.
+CTA: same closing CTA band component as homepage, reused.
+Meta title: SEO Services in Delhi NCR | Business Doctor, description derived from the SEO paragraph.
+Mark this file clearly with a comment at the top: // DUMMY TEMPLATE — duplicate this file per service (ppc.js, smm.js, web-development.js, ecommerce.js, product-photography.js) and swap the content props.
+
+7. Performance Checklist (CLS + LCP)
+LCP (hero must load fast):
+
+ Hero heading text renders as real HTML text (not inside an image, not client-fetched) — text is always the fastest LCP element.
+ If hero has a background/hero image, load it with next/image priority (not loading="lazy") and fetchPriority="high".
+ Do not gate the hero behind a JS animation that delays paint — hero content should be visible immediately; Framer Motion fade-in should start from a barely-reduced opacity (e.g. 0.4, not 0) or skip fade-in on hero text entirely and only animate the CTA/image.
+ Fonts loaded via next/font (self-hosted, no external Google Fonts <link> — this alone removes a major render-blocking request).
+ No render-blocking third-party scripts above the fold (analytics/chat widgets loaded via next/script strategy="lazyOnload").
+CLS (nothing should jump):
+
+ Every next/image has explicit width/height or a sized aspect-ratio wrapper (aspect-[4/3] etc.) — reserve the space before the image loads.
+ Fonts use display: 'swap' + next/font (which also matches fallback font metrics automatically — this is the #1 CLS killer for text-heavy sites like this one).
+ Animations only ever touch opacity and transform (translate/scale) — never margin, height (except the FAQ accordion, which is expected/user-triggered and exempt), top, or width.
+ Accordion (FAQ) height-animation is user-triggered, not on load — doesn't count against CLS score.
+ No ads/embeds/late-injected banners above existing content.
+ Pricing table on mobile has a fixed row height so no reflow while data renders (it's static content so this should be trivial — just don't lazy-fetch it).
+General:
+
+ Use getStaticProps/static pages throughout (all content is static — no need for SSR).
+ Compress/serve images as WebP/AVIF via next/image automatic optimization.
+ Run a Lighthouse pass before calling it done — target LCP < 2.5s, CLS < 0.1, INP < 200ms.
+8. Final Instruction to the AI Coding Tool
+Build the project now following Sections 0–7 exactly. Use .js files only. Do not add stock testimonials, team bios, or any content not present in this brief. Ask me before inventing placeholder client logos or fake review content — leave those sections out entirely if not provided rather than fabricating them.

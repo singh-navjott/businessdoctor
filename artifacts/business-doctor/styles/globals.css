@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: #0f171d;
+  --trust: #0b3b5c;
+  --orange: #f97316;
+  --green: #0ea36b;
+  --paper: #ffffff;
+  --mist: #f8fafb;
+  --line: #e4eaef;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body), sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: #fbd1b5; color: var(--trust); }
+a, button { -webkit-tap-highlight-color: transparent; }
+.eyebrow {
+  color: var(--orange);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.display { font-family: var(--font-heading), sans-serif; letter-spacing: -0.045em; }
+.prose-copy { color: #5b6b7a; line-height: 1.75; }
+.section-rule { border-top: 1px solid var(--line); }
+.dot-grid {
+  background-image: radial-gradient(#c7d5df 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+.hero-grid {
+  background:
+    linear-gradient(90deg, rgba(11,59,92,.05) 1px, transparent 1px),
+    linear-gradient(rgba(11,59,92,.05) 1px, transparent 1px);
+  background-size: 54px 54px;
+}
+.focus-ring:focus-visible { outline: 3px solid rgba(249,115,22,.55); outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}
