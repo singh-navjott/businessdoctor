@@ -20,10 +20,13 @@ export default function Header() {
           <span className="display text-base font-extrabold tracking-tight text-primary">Business Doctor</span>
         </Link>
         <nav aria-label="Primary navigation" className="hidden items-center gap-7 md:flex">
-          <Link href="#services" className="focus-ring text-sm font-medium text-neutral-600 transition-colors hover:text-primary">Services</Link>
-          <Link href="#pricing" className="focus-ring text-sm font-medium text-neutral-600 transition-colors hover:text-primary">Pricing</Link>
-          <Link href="#faq" className="focus-ring text-sm font-medium text-neutral-600 transition-colors hover:text-primary">FAQs</Link>
-          <Button href="#faq">Get a Free Quote</Button>
+          <Link href="/#services" className="focus-ring text-sm font-medium text-neutral-600 transition-colors hover:text-primary">Services</Link>
+          <Link href="/#pricing" className="focus-ring text-sm font-medium text-neutral-600 transition-colors hover:text-primary">Pricing</Link>
+          <Link href="/case-studies" className="focus-ring text-sm font-medium text-neutral-600 transition-colors hover:text-primary">Case Studies</Link>
+          <Link href="/blogs" className="focus-ring text-sm font-medium text-neutral-600 transition-colors hover:text-primary">Blogs</Link>
+          <Link href="/#faq" className="focus-ring text-sm font-medium text-neutral-600 transition-colors hover:text-primary">FAQs</Link>
+          <Link href="/contact" className="focus-ring text-sm font-medium text-neutral-600 transition-colors hover:text-primary">Contact</Link>
+          <Button href="/contact">Get a Free Quote</Button>
         </nav>
         <button type="button" aria-label="Toggle navigation menu" aria-expanded={open} onClick={() => setOpen(!open)} className="focus-ring rounded-lg border border-neutral-200 px-3 py-2 text-sm font-semibold text-primary md:hidden">
           {open ? 'Close' : 'Menu'}
@@ -32,10 +35,13 @@ export default function Header() {
       {open && (
         <nav aria-label="Mobile navigation" className="border-t border-neutral-200 bg-white px-4 pb-5 pt-3 md:hidden">
           <div className="flex flex-col gap-1">
-            <Link href="#services" onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 text-sm font-medium text-neutral-600 hover:bg-neutral-50">Services</Link>
-            <Link href="#pricing" onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 text-sm font-medium text-neutral-600 hover:bg-neutral-50">Pricing</Link>
-            <Link href="#faq" onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 text-sm font-medium text-neutral-600 hover:bg-neutral-50">FAQs</Link>
-            <Button href="#faq" className="mt-2 w-full">Get a Free Quote</Button>
+            <Link href="/#services" onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 text-sm font-medium text-neutral-600 hover:bg-neutral-50">Services</Link>
+            <Link href="/#pricing" onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 text-sm font-medium text-neutral-600 hover:bg-neutral-50">Pricing</Link>
+            <Link href="/case-studies" onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 text-sm font-medium text-neutral-600 hover:bg-neutral-50">Case Studies</Link>
+            <Link href="/blogs" onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 text-sm font-medium text-neutral-600 hover:bg-neutral-50">Blogs</Link>
+            <Link href="/#faq" onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 text-sm font-medium text-neutral-600 hover:bg-neutral-50">FAQs</Link>
+            <Link href="/contact" onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 text-sm font-medium text-neutral-600 hover:bg-neutral-50">Contact</Link>
+            <Button href="/contact" className="mt-2 w-full">Get a Free Quote</Button>
           </div>
         </nav>
       )}
