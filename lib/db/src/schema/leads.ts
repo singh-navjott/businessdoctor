@@ -18,5 +18,5 @@ export const leads = pgTable("leads", {
 });
 
 export const insertLeadSchema = createInsertSchema(leads).omit({ id: true, createdAt: true, updatedAt: true });
-export type InsertLead = z.infer<typeof insertLeadSchema>;
+export type InsertLead = typeof insertLeadSchema._output;
 export type Lead = typeof leads.$inferSelect;

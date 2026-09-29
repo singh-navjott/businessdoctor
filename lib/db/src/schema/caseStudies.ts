@@ -30,5 +30,5 @@ export const caseStudies = pgTable("case_studies", {
 });
 
 export const insertCaseStudySchema = createInsertSchema(caseStudies).omit({ id: true, createdAt: true, updatedAt: true });
-export type InsertCaseStudy = z.infer<typeof insertCaseStudySchema>;
+export type InsertCaseStudy = typeof insertCaseStudySchema._output;
 export type CaseStudy = typeof caseStudies.$inferSelect;
